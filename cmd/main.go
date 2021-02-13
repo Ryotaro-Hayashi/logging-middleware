@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +71,10 @@ func main() {
 	// ミドルウェアを実装
 	mux.HandleFunc("/hello", middlewares.then(helloHandler))
 
-	log.WithFields(log.Fields{
+	log := logrus.New()
+	log.Formatter = new(logrus.JSONFormatter) // JSONで出力
+
+	log.WithFields(logrus.Fields{
 		"animal": "walrus",
 		"number": 1,
 		"size":   10,
