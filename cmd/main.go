@@ -61,6 +61,8 @@ func (m mwStack) then(h http.HandlerFunc) http.HandlerFunc {
 	return h
 }
 
+var log = logrus.New()
+
 func main() {
 	// ミドルウェアをまとめる（初期化処理）
 	middlewares := newMws(middleware1, middleware2, middleware3)
@@ -71,14 +73,30 @@ func main() {
 	// ミドルウェアを実装
 	mux.HandleFunc("/hello", middlewares.then(helloHandler))
 
-	log := logrus.New()
 	log.Formatter = new(logrus.JSONFormatter) // JSONで出力
+	log.SetLevel(logrus.WarnLevel)            // ログレベルの設定
 
-	log.WithFields(logrus.Fields{
-		"animal": "walrus",
+	/* logrusのログレベルは7つ
+	/*
+	   panic
+	   fatal
+	   error
+	   warn
+	   info
+	   debug
+	   trace
+	*/
+	/* セットしたレベル以上のものが出力 */
+
+	log.WithFields(logrus.Fields{ // 出力されない
 		"number": 1,
 		"size":   10,
-	}).Info("A walrus appears")
+	}).Info("this is info level")
+
+	log.WithFields(logrus.Fields{ // 出力される
+		"number": 1,
+		"size":   10,
+	}).Error("this is error level")
 
 	http.ListenAndServe(":8080", mux)
 }
