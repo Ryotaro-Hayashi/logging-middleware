@@ -3,6 +3,10 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"gopkg.in/natefinch/lumberjack.v2"
+
+	"github.com/sirupsen/logrus"
 )
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
@@ -59,6 +63,8 @@ func (m mwStack) then(h http.HandlerFunc) http.HandlerFunc {
 	return h
 }
 
+var log = logrus.New()
+
 func main() {
 	// ミドルウェアをまとめる（初期化処理）
 	middlewares := newMws(middleware1, middleware2, middleware3)
@@ -68,6 +74,41 @@ func main() {
 	// 第2引数は「func(ResponseWriter, *Request)」
 	// ミドルウェアを実装
 	mux.HandleFunc("/hello", middlewares.then(helloHandler))
+
+	log.Formatter = new(logrus.JSONFormatter) // JSONで出力
+	log.SetLevel(logrus.WarnLevel)            // ログレベルの設定
+
+	/* logrusのログレベルは7つ
+	/*
+	   panic
+	   fatal
+	   error
+	   warn
+	   info
+	   debug
+	   trace
+	*/
+	/* セットしたレベル以上のものが出力 */
+
+	// 出力先をファイルに指定
+	log.SetOutput(&lumberjack.Logger{
+		Filename:   "logs/app.log", // ファイル名
+		MaxSize:    500,            // ローテーションするファイルサイズ(megabytes)
+		MaxBackups: 3,              // 保持する古いログの最大ファイル数
+		MaxAge:     365,            // 古いログを保持する日数
+		LocalTime:  true,           // バックアップファイルの時刻フォーマットをサーバローカル時間指定
+		Compress:   true,           // ローテーションされたファイルのgzip圧縮
+	})
+
+	log.WithFields(logrus.Fields{ // 出力されない
+		"number": 1,
+		"size":   10,
+	}).Info("this is info level")
+
+	log.WithFields(logrus.Fields{ // 出力される
+		"number": 1,
+		"size":   10,
+	}).Error("this is error level")
 
 	http.ListenAndServe(":8080", mux)
 }
