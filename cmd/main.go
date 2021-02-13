@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"gopkg.in/natefinch/lumberjack.v2"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -87,6 +89,16 @@ func main() {
 	   trace
 	*/
 	/* セットしたレベル以上のものが出力 */
+
+	// 出力先をファイルに指定
+	log.SetOutput(&lumberjack.Logger{
+		Filename:   "logs/app.log", // ファイル名
+		MaxSize:    500,            // ローテーションするファイルサイズ(megabytes)
+		MaxBackups: 3,              // 保持する古いログの最大ファイル数
+		MaxAge:     365,            // 古いログを保持する日数
+		LocalTime:  true,           // バックアップファイルの時刻フォーマットをサーバローカル時間指定
+		Compress:   true,           // ローテーションされたファイルのgzip圧縮
+	})
 
 	log.WithFields(logrus.Fields{ // 出力されない
 		"number": 1,
