@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,6 +70,12 @@ func main() {
 	// 第2引数は「func(ResponseWriter, *Request)」
 	// ミドルウェアを実装
 	mux.HandleFunc("/hello", middlewares.then(helloHandler))
+
+	log.WithFields(log.Fields{
+		"animal": "walrus",
+		"number": 1,
+		"size":   10,
+	}).Info("A walrus appears")
 
 	http.ListenAndServe(":8080", mux)
 }
