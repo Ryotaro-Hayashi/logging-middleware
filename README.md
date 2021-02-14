@@ -1,2 +1,2 @@
 # logging-middleware
-んミドルウェアの実装方法の確認とlogrusでJSONのログをファイルに吐き出してみた
+ミドルウェアの実装方法の確認とlogrusでJSONのログをファイルに吐き出してみた
